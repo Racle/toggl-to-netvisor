@@ -16,22 +16,34 @@ A web application to fetch Toggl time entries and convert them to Netvisor-compa
 
 ## Quick Start
 
+### Using Pre-built Docker Image (Easiest)
+
+```bash
+# Pull and run the pre-built image
+docker run -d -p 80:80 racle90/toggl-to-netvisor:latest
+
+# Or with docker-compose, use:
+# image: racle90/toggl-to-netvisor:latest
+```
+
+Pre-built images are available at: https://hub.docker.com/repository/docker/racle90/toggl-to-netvisor
+
 ### Using Docker Compose (Recommended)
 
 ```bash
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost`
+The application will be available at `http://localhost:9999`
 
-### Using Docker
+### Using Docker (Build from Source)
 
 ```bash
 # Build the image
-docker build -t toggl-tracker .
+docker build -t toggl-to-netvisor .
 
 # Run the container
-docker run -d -p 80:80 toggl-tracker
+docker run -d -p 80:80 toggl-to-netvisor
 ```
 
 ### Manual Installation
@@ -63,7 +75,7 @@ environment:
   - BASE_PATH=/toggl-to-netvisor
 
 # Or with Docker
-docker run -d -p 80:80 -e BASE_PATH=/toggl-to-netvisor toggl-tracker
+docker run -d -p 80:80 -e BASE_PATH=/toggl-to-netvisor toggl-to-netvisor
 
 # Or manually
 BASE_PATH=/toggl-to-netvisor node server.js

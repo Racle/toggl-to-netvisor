@@ -1,8 +1,10 @@
 version: '3.8'
 
 services:
-  toggl-tracker:
+  toggl-to-netvisor:
     build: .
+    # Or use pre-built image:
+    # image: racle90/toggl-to-netvisor:latest
     ports:
       - "9999:80"
     restart: unless-stopped
