@@ -3,6 +3,7 @@ const cors = require('cors')
 const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
+const rateLimit = require('express-rate-limit')
 
 const app = express()
 const PORT = 80
@@ -10,6 +11,23 @@ const BASE_PATH = process.env.BASE_PATH || ''
 
 // CSRF token storage (in production, use Redis or similar)
 const csrfTokens = new Map()
+
+// Rate limiters
+const apiLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 100, // Limit each IP to 100 requests per windowMs
+  message: { error: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+const togglLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minute
+  max: 10, // Limit each IP to 10 Toggl API calls per minute
+  message: { error: 'Too many Toggl API requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+})
 
 // Middleware
 app.use(cors())
@@ -41,7 +59,7 @@ app.get(`${BASE_PATH}/`, (req, res) => {
 })
 
 // Generate CSRF token
-app.get(`${BASE_PATH}/api/csrf-token`, (req, res) => {
+app.get(`${BASE_PATH}/api/csrf-token`, apiLimiter, (req, res) => {
   const token = crypto.randomBytes(32).toString('hex')
   const sessionId = crypto.randomBytes(16).toString('hex')
 
@@ -85,7 +103,7 @@ function verifyCsrfToken(req, res, next) {
 }
 
 // Proxy endpoint for Toggl API
-app.post(`${BASE_PATH}/api/toggl/time-entries`, verifyCsrfToken, async (req, res) => {
+app.post(`${BASE_PATH}/api/toggl/time-entries`, togglLimiter, verifyCsrfToken, async (req, res) => {
   const { apiToken, startDate, endDate } = req.body
 
   if (!apiToken || !startDate || !endDate) {
@@ -130,4 +148,5 @@ app.get(`${BASE_PATH}/health`, (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}${BASE_PATH}`)
   console.log(`CSRF tokens will expire after 1 hour of inactivity`)
+  console.log(`Rate limits: 100 API requests per hour, 10 Toggl calls per min`)
 })

@@ -7,6 +7,7 @@ A web application to fetch Toggl time entries and convert them to Netvisor-compa
 ## Features
 
 - 🔐 Secure API proxy with CSRF protection
+- 🛡️ Rate limiting to prevent abuse (100 API requests per hour, 10 Toggl calls per min)
 - 💾 Client-side caching with localStorage
 - ⚙️ Configurable round-down threshold (0/5/10/15 minutes)
 - 📊 Weekly time reports with 15-minute rounding
@@ -98,6 +99,13 @@ Then access the app at `http://localhost/toggl-to-netvisor`
 - Server generates unique CSRF tokens for each session
 - Tokens expire after 1 hour of inactivity
 - All API requests require valid CSRF token
+
+### Rate Limiting
+
+- General API endpoints: 100 requests per hour per IP
+- Toggl API calls: 10 requests per minute per IP
+- Returns 429 status code when limit exceeded
+- Prevents abuse and protects against DDoS attacks
 
 ### Caching
 
