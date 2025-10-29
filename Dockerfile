@@ -12,6 +12,7 @@ RUN npm install --production
 COPY server.js .
 COPY index.html .
 COPY t2n-favicon.png .
+COPY github.png .
 
 # Expose port 80
 EXPOSE 80

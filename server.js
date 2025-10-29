@@ -21,6 +21,12 @@ app.get(`${BASE_PATH}/t2n-favicon.png`, (req, res) => {
   res.sendFile(path.join(__dirname, 't2n-favicon.png'))
 })
 
+// Serve GitHub icon with cache headers
+app.get(`${BASE_PATH}/github.png`, (req, res) => {
+  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable') // 1 year
+  res.sendFile(path.join(__dirname, 'github.png'))
+})
+
 // Serve index.html with BASE_PATH injection and cache headers
 app.get(`${BASE_PATH}/`, (req, res) => {
   const htmlPath = path.join(__dirname, 'index.html')
