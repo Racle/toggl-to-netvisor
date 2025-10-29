@@ -307,6 +307,35 @@
         font-style: italic;
       }
 
+      .source-link {
+        text-align: center;
+        padding: 20px;
+        margin-top: 10px;
+      }
+
+      .source-link a {
+        color: #a78bfa;
+        text-decoration: none;
+        font-size: 0.9em;
+        transition: color 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .source-link a:hover {
+        color: #c4b5fd;
+        text-decoration: underline;
+      }
+
+      .source-link img {
+        width: 20px;
+        height: 20px;
+        background: white;
+        border-radius: 50%;
+        padding: 3px;
+        margin-right: 8px;
+      }
+
       /* Toast notifications */
       .toast-container {
         position: fixed;
@@ -1133,6 +1162,13 @@
         if (cacheTime) {
           html += `<div class="last-updated">Last updated: ${formatTimestamp(parseInt(cacheTime))}</div>`
         }
+
+        html += `<div class="source-link">
+          <a href="https://github.com/Racle/toggl-to-netvisor" target="_blank" rel="noopener noreferrer">
+            <img src="https://github.githubassets.com/favicons/favicon.png" alt="GitHub">
+            View Source Code on GitHub
+          </a>
+        </div>`
 
         resultsDiv.innerHTML = html
       }

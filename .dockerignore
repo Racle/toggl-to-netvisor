@@ -3,5 +3,5 @@ npm-debug.log
 .git
 .gitignore
 README.md
-toggl-data
 .env
+toggl-to-netvisor.sh
