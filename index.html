@@ -1,0 +1,1168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Toggl to Netvisor</title>
+    <link rel="icon" type="image/png" href="./t2n-favicon.png" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        min-height: 100vh;
+        min-width: 600px;
+        padding: 20px;
+        color: #e4e4e7;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        background: #1e1e2e;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+        border: 1px solid #2a2a3e;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+      }
+
+      .header h1 img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        box-shadow:
+          0 0 20px rgba(139, 92, 246, 0.6),
+          0 0 40px rgba(139, 92, 246, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .header h1 img:hover {
+        box-shadow:
+          0 0 30px rgba(139, 92, 246, 0.8),
+          0 0 60px rgba(139, 92, 246, 0.5);
+        transform: rotate(360deg);
+      }
+
+      .header p {
+        opacity: 0.9;
+        font-size: 1.1em;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .settings-card {
+        background: #27293d;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 2px solid #3a3d5c;
+      }
+
+      .settings-card h2 {
+        color: #8b5cf6;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #d4d4d8;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px 15px;
+        border: 2px solid #3a3d5c;
+        border-radius: 10px;
+        font-size: 1em;
+        transition: all 0.3s ease;
+        background: #1e1e2e;
+        color: #e4e4e7;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #8b5cf6;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+      }
+
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+      }
+
+      .btn {
+        padding: 12px 30px;
+        border: none;
+        border-radius: 10px;
+        font-size: 1em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.6);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .btn-secondary {
+        background: #3f3f46;
+        color: white;
+        margin-left: 10px;
+      }
+
+      .btn-secondary:hover {
+        background: #52525b;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 40px;
+        font-size: 1.2em;
+        color: #8b5cf6;
+      }
+
+      .spinner {
+        border: 4px solid #3a3d5c;
+        border-top: 4px solid #8b5cf6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .results {
+        margin-top: 30px;
+      }
+
+      .week-section {
+        background: #27293d;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 25px;
+        border: 2px solid #3a3d5c;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .week-header {
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        font-size: 1.3em;
+        font-weight: 600;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      thead {
+        background: #1e1e2e;
+      }
+
+      th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        color: #d4d4d8;
+        border-bottom: 2px solid #3a3d5c;
+      }
+
+      tbody tr {
+        background: #27293d !important;
+      }
+
+      tbody tr:nth-child(even) {
+        background: #2d2f42 !important;
+      }
+
+      td {
+        padding: 12px;
+        border-bottom: 1px solid #3a3d5c;
+        color: #e4e4e7;
+      }
+
+      tbody tr:hover {
+        background: #32344a !important;
+      }
+
+      .netvisor-time {
+        font-weight: 700;
+        color: #a78bfa;
+        font-size: 1.1em;
+      }
+
+      .weekend {
+        opacity: 0.7 !important;
+      }
+
+      .week-summary {
+        background: #1e1e2e;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 15px;
+        font-weight: 600;
+        border: 1px solid #3a3d5c;
+      }
+
+      .summary-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 0;
+      }
+
+      .summary-label {
+        color: #a1a1aa;
+      }
+
+      .summary-value {
+        color: #a78bfa;
+        font-size: 1.1em;
+      }
+
+      .error {
+        background: #3f1c1c;
+        color: #fca5a5;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border: 1px solid #7f1d1d;
+      }
+
+      .info {
+        background: #1e3a5f;
+        color: #93c5fd;
+        padding: 15px;
+        border-radius: 10px;
+        margin-top: 20px;
+        border: 1px solid #1e40af;
+      }
+
+      .last-updated {
+        text-align: center;
+        color: #a1a1aa;
+        font-size: 0.9em;
+        margin-top: 20px;
+        font-style: italic;
+      }
+
+      /* Toast notifications */
+      .toast-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 400px;
+      }
+
+      .toast {
+        background: #27293d;
+        border: 2px solid #3a3d5c;
+        border-radius: 10px;
+        padding: 15px 45px 15px 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        animation: slideInRight 0.3s ease;
+        position: relative;
+        min-width: 300px;
+      }
+
+      .toast.info {
+        border-left: 4px solid #3b82f6;
+      }
+
+      .toast.success {
+        border-left: 4px solid #10b981;
+      }
+
+      .toast.error {
+        border-left: 4px solid #ef4444;
+      }
+
+      .toast-content {
+        color: #e4e4e7;
+        font-size: 0.95em;
+        line-height: 1.4;
+      }
+
+      .toast-close {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: transparent;
+        border: none;
+        color: #a1a1aa;
+        font-size: 1.5em;
+        cursor: pointer;
+        padding: 0;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.3s ease;
+      }
+
+      .toast-close:hover {
+        color: #e4e4e7;
+      }
+
+      .toast.removing {
+        animation: slideOutRight 0.3s ease;
+      }
+
+      @keyframes slideInRight {
+        from {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(400px);
+          opacity: 0;
+        }
+      }
+
+      .info-icon {
+        display: inline-block;
+        cursor: pointer;
+        margin-left: 5px;
+        font-size: 0.9em;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+      }
+
+      .info-icon:hover {
+        opacity: 1;
+      }
+
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100dvh;
+        background: rgba(0, 0, 0, 0.7);
+        animation: fadeIn 0.3s ease;
+        overflow-y: auto;
+        padding: 20px;
+      }
+
+      .modal-content {
+        background: #27293d;
+        margin: 5dvh auto;
+        padding: 30px;
+        border: 2px solid #3a3d5c;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85dvh;
+        overflow-y: auto;
+        position: relative;
+        animation: slideIn 0.3s ease;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+      }
+
+      .modal-header {
+        color: #8b5cf6;
+        font-size: 1.5em;
+        margin-bottom: 20px;
+        font-weight: 600;
+      }
+
+      .modal-body {
+        color: #d4d4d8;
+        line-height: 1.6;
+      }
+
+      .modal-body h3 {
+        color: #a78bfa;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1.2em;
+      }
+
+      .modal-body ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+
+      .modal-body li {
+        margin: 8px 0;
+      }
+
+      .modal-body code {
+        background: #1e1e2e;
+        padding: 2px 6px;
+        border-radius: 4px;
+        color: #a78bfa;
+        font-family: 'Courier New', monospace;
+      }
+
+      .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 2em;
+        color: #a1a1aa;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .modal-close:hover {
+        color: #e4e4e7;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes slideIn {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+
+        .header h1 {
+          font-size: 1.8em;
+        }
+
+        .header h1 img {
+          width: 40px;
+          height: 40px;
+          box-shadow:
+            0 0 15px rgba(139, 92, 246, 0.6),
+            0 0 30px rgba(139, 92, 246, 0.3);
+        }
+
+        table {
+          font-size: 0.9em;
+        }
+
+        .btn {
+          width: 100%;
+          margin: 5px 0;
+        }
+
+        .btn-secondary {
+          margin-left: 0;
+        }
+
+        .modal {
+          padding: 10px;
+        }
+
+        .modal-content {
+          margin: 2dvh auto;
+          padding: 20px;
+          max-height: 90dvh;
+          width: 95%;
+        }
+
+        .modal-header {
+          font-size: 1.2em;
+          padding-right: 30px;
+        }
+
+        .modal-body {
+          font-size: 0.95em;
+        }
+
+        .modal-close {
+          font-size: 1.5em;
+          top: 10px;
+          right: 15px;
+        }
+
+        .toast-container {
+          top: 10px;
+          right: 10px;
+          left: 10px;
+          max-width: none;
+        }
+
+        .toast {
+          min-width: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1><img src="./t2n-favicon.png" alt="" /> Toggl to Netvisor</h1>
+        <p>Convert your Toggl time entries to Netvisor-ready hours</p>
+      </div>
+
+      <div class="content">
+        <div class="settings-card">
+          <h2>⚙️ Settings</h2>
+
+          <div class="form-group">
+            <label for="apiToken">
+              Toggl API Token
+              <span class="info-icon" onclick="showApiTokenInfo()">ℹ️</span>
+            </label>
+            <input type="password" id="apiToken" placeholder="Enter your Toggl API token" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="numWeeks">Number of Past Weeks</label>
+              <select id="numWeeks">
+                <option value="1">1 Week</option>
+                <option value="2">2 Weeks</option>
+                <option value="3">3 Weeks</option>
+                <option value="4" selected>4 Weeks</option>
+                <option value="5">5 Weeks</option>
+                <option value="6">6 Weeks</option>
+                <option value="7">7 Weeks</option>
+                <option value="8">8 Weeks</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="roundThreshold">
+                Round Down Threshold (minutes)
+                <span class="info-icon" onclick="showThresholdInfo()">ℹ️</span>
+              </label>
+              <select id="roundThreshold">
+                <option value="0">0 minutes</option>
+                <option value="5" selected>5 minutes</option>
+                <option value="10">10 minutes</option>
+                <option value="15">15 minutes</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <button class="btn btn-primary" id="fetchBtn" onclick="fetchData()">🔄 Get New Data</button>
+            <button class="btn btn-secondary" onclick="clearCache()">🗑️ Clear Cache</button>
+          </div>
+        </div>
+
+        <div id="results"></div>
+      </div>
+    </div>
+
+    <!-- Toast notification container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Modal for threshold explanation -->
+    <div id="thresholdModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeThresholdInfo()">&times;</span>
+        <div class="modal-header">⚙️ Round Down Threshold Explained</div>
+        <div class="modal-body">
+          <p>The round down threshold controls how your time entries are rounded to 15-minute blocks for Netvisor reporting.</p>
+
+          <h3>How It Works:</h3>
+          <ul>
+            <li>Your raw time is first rounded to the nearest minute</li>
+            <li>Then calculated how many minutes are "over" the last 15-minute block</li>
+            <li>If those extra minutes are <strong>less than</strong> the threshold → round <strong>down</strong></li>
+            <li>Otherwise → round <strong>up</strong></li>
+          </ul>
+
+          <h3>Examples with different thresholds:</h3>
+          <p><strong>Raw time: 1 hour 7 minutes (67 minutes)</strong></p>
+          <ul>
+            <li><code>0 min threshold</code>: 7 < 0? No → Round up → <strong>75 min (1:15)</strong></li>
+            <li><code>5 min threshold</code>: 7 < 5? No → Round up → <strong>75 min (1:15)</strong></li>
+            <li><code>10 min threshold</code>: 7 < 10? Yes → Round down → <strong>60 min (1:00)</strong></li>
+          </ul>
+
+          <p><strong>Raw time: 1 hour 3 minutes (63 minutes)</strong></p>
+          <ul>
+            <li><code>0 min threshold</code>: 3 < 0? No → Round up → <strong>75 min (1:15)</strong></li>
+            <li><code>5 min threshold</code>: 3 < 5? Yes → Round down → <strong>60 min (1:00)</strong></li>
+            <li><code>10 min threshold</code>: 3 < 10? Yes → Round down → <strong>60 min (1:00)</strong></li>
+          </ul>
+
+          <h3>After Rounding:</h3>
+          <p>30 minutes (lunch break) is automatically subtracted to get the final <strong>Netvisor time</strong>.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal for API token help -->
+    <div id="apiTokenModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeApiTokenInfo()">&times;</span>
+        <div class="modal-header">🔑 How to Get Your Toggl API Token</div>
+        <div class="modal-body">
+          <p>Follow these steps to find your Toggl API token:</p>
+
+          <h3>Steps:</h3>
+          <ol style="line-height: 2">
+            <li>Go to <a href="https://track.toggl.com/profile" target="_blank" style="color: #a78bfa">Toggl Track Profile page</a></li>
+            <li>Log in to your Toggl account if you haven't already</li>
+            <li>Scroll down to the <strong>bottom of the page</strong></li>
+            <li>Look for the <strong>"API Token"</strong> section</li>
+            <li>Click <strong>"Click to reveal"</strong> to show your token</li>
+            <li>Copy the token and paste it into the field above</li>
+          </ol>
+
+          <div style="background: #1e1e2e; padding: 15px; border-radius: 10px; margin-top: 20px; border-left: 4px solid #a78bfa">
+            <p style="margin: 0"><strong>💡 Tip:</strong> Keep your API token secure and don't share it with anyone. It gives full access to your Toggl account data.</p>
+          </div>
+
+          <div style="margin-top: 20px; text-align: center">
+            <a href="https://track.toggl.com/profile#api-token" target="_blank" class="btn btn-primary" style="display: inline-block; text-decoration: none"> Open Toggl Profile Page </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Base path configuration
+      const BASE_PATH = '{{BASE_PATH}}'
+
+      // Toast notification system
+      function showToast(message, type = 'info', duration = 20000) {
+        const container = document.getElementById('toastContainer')
+        const toast = document.createElement('div')
+        toast.className = `toast ${type}`
+
+        const content = document.createElement('div')
+        content.className = 'toast-content'
+        content.textContent = message
+
+        const closeBtn = document.createElement('button')
+        closeBtn.className = 'toast-close'
+        closeBtn.innerHTML = '&times;'
+        closeBtn.onclick = () => removeToast(toast)
+
+        toast.appendChild(content)
+        toast.appendChild(closeBtn)
+        container.appendChild(toast)
+
+        // Auto remove after duration
+        const timeout = setTimeout(() => removeToast(toast), duration)
+        toast.dataset.timeout = timeout
+
+        return toast
+      }
+
+      function removeToast(toast) {
+        if (toast.dataset.timeout) {
+          clearTimeout(parseInt(toast.dataset.timeout))
+        }
+        toast.classList.add('removing')
+        setTimeout(() => {
+          if (toast.parentNode) {
+            toast.parentNode.removeChild(toast)
+          }
+        }, 300)
+      }
+
+      // CSRF token management
+      let csrfToken = null
+      let sessionId = null
+
+      // Get CSRF token from server
+      async function getCsrfToken() {
+        try {
+          const response = await fetch(`${BASE_PATH}/api/csrf-token`)
+          if (!response.ok) {
+            throw new Error('Failed to get CSRF token')
+          }
+          const data = await response.json()
+          csrfToken = data.token
+          sessionId = data.sessionId
+          return true
+        } catch (error) {
+          console.error('Error getting CSRF token:', error)
+          return false
+        }
+      }
+
+      // Load settings from localStorage
+      function loadSettings() {
+        const apiToken = localStorage.getItem('toggl_api_token')
+        const numWeeks = localStorage.getItem('toggl_num_weeks') || '4'
+        const roundThreshold = localStorage.getItem('toggl_round_threshold') || '5'
+
+        if (apiToken) {
+          document.getElementById('apiToken').value = apiToken
+        }
+        document.getElementById('numWeeks').value = numWeeks
+        document.getElementById('roundThreshold').value = roundThreshold
+      }
+
+      // Show threshold info modal
+      function showThresholdInfo() {
+        document.getElementById('thresholdModal').style.display = 'block'
+      }
+
+      // Close threshold info modal
+      function closeThresholdInfo() {
+        document.getElementById('thresholdModal').style.display = 'none'
+      }
+
+      // Show API token info modal
+      function showApiTokenInfo() {
+        document.getElementById('apiTokenModal').style.display = 'block'
+      }
+
+      // Close API token info modal
+      function closeApiTokenInfo() {
+        document.getElementById('apiTokenModal').style.display = 'none'
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function (event) {
+        const thresholdModal = document.getElementById('thresholdModal')
+        const apiTokenModal = document.getElementById('apiTokenModal')
+        if (event.target === thresholdModal) {
+          thresholdModal.style.display = 'none'
+        }
+        if (event.target === apiTokenModal) {
+          apiTokenModal.style.display = 'none'
+        }
+      }
+
+      // Save settings to localStorage
+      function saveSettings() {
+        const apiToken = document.getElementById('apiToken').value
+        const numWeeks = document.getElementById('numWeeks').value
+        const roundThreshold = document.getElementById('roundThreshold').value
+
+        localStorage.setItem('toggl_api_token', apiToken)
+        localStorage.setItem('toggl_num_weeks', numWeeks)
+        localStorage.setItem('toggl_round_threshold', roundThreshold)
+      }
+
+      // Format timestamp to DD.MM.YYYY HH:MM:SS
+      function formatTimestamp(timestamp) {
+        const date = new Date(timestamp)
+        const day = String(date.getDate()).padStart(2, '0')
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const year = date.getFullYear()
+        const hours = String(date.getHours()).padStart(2, '0')
+        const minutes = String(date.getMinutes()).padStart(2, '0')
+        const seconds = String(date.getSeconds()).padStart(2, '0')
+        return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`
+      }
+
+      // Load cached data
+      function loadCachedData() {
+        const cachedData = localStorage.getItem('toggl_cached_data')
+        const cacheTime = localStorage.getItem('toggl_cache_time')
+
+        if (cachedData && cacheTime) {
+          const data = JSON.parse(cachedData)
+          displayResults(data)
+          showToast(`Using cached data from ${formatTimestamp(parseInt(cacheTime))}`, 'info')
+        }
+      }
+
+      // Fetch data from Toggl API
+      async function fetchData() {
+        saveSettings()
+
+        const apiToken = document.getElementById('apiToken').value
+        const numWeeks = parseInt(document.getElementById('numWeeks').value)
+
+        if (!apiToken) {
+          showError('Please enter your Toggl API token')
+          return
+        }
+
+        const resultsDiv = document.getElementById('results')
+        resultsDiv.innerHTML = '<div class="loading"><div class="spinner"></div>Fetching data from Toggl...</div>'
+
+        try {
+          // Get CSRF token if we don't have one
+          if (!csrfToken) {
+            const success = await getCsrfToken()
+            if (!success) {
+              throw new Error('Failed to get CSRF token')
+            }
+          }
+
+          // Calculate date range using UTC to avoid timezone issues
+          const today = new Date()
+          const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+
+          // Get day of week in UTC (0=Sunday, 1=Monday, ..., 6=Saturday)
+          let dayOfWeek = todayUTC.getUTCDay()
+          // Convert Sunday (0) to 7 for calculation
+          if (dayOfWeek === 0) dayOfWeek = 7
+
+          const thisMonday = new Date(todayUTC)
+          // Go back to Monday (day 1)
+          thisMonday.setUTCDate(todayUTC.getUTCDate() - (dayOfWeek - 1))
+
+          const startDate = new Date(thisMonday)
+          startDate.setUTCDate(thisMonday.getUTCDate() - numWeeks * 7)
+
+          const endDate = new Date(todayUTC)
+          endDate.setUTCHours(23, 59, 59, 999)
+
+          // Format dates for API
+          const startDateStr = startDate.toISOString()
+          const endDateStr = endDate.toISOString()
+
+          // Fetch from Toggl API via backend proxy
+          const response = await fetch(`${BASE_PATH}/api/toggl/time-entries`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRF-Token': csrfToken,
+              'X-Session-Id': sessionId,
+            },
+            body: JSON.stringify({
+              apiToken: apiToken,
+              startDate: startDateStr,
+              endDate: endDateStr,
+            }),
+          })
+
+          if (!response.ok) {
+            // If CSRF token expired, get a new one and retry
+            if (response.status === 403) {
+              csrfToken = null
+              sessionId = null
+              const success = await getCsrfToken()
+              if (success) {
+                return fetchData() // Retry with new token
+              }
+            }
+            const errorData = await response.json()
+            throw new Error(errorData.error || `API Error: ${response.status}`)
+          }
+
+          const entries = await response.json()
+
+          // Process entries
+          const processedData = processEntries(entries, startDate, endDate, numWeeks)
+
+          // Cache the data
+          localStorage.setItem('toggl_cached_data', JSON.stringify(processedData))
+          localStorage.setItem('toggl_cache_time', Date.now().toString())
+
+          displayResults(processedData)
+          showToast(`Fetched ${entries.length} time entries successfully`, 'success')
+        } catch (error) {
+          showError(`Error fetching data: ${error.message}`)
+          showToast(`Error: ${error.message}`, 'error')
+        }
+      }
+
+      // Process time entries into weekly format
+      function processEntries(entries, startDate, endDate, numWeeks) {
+        const roundThreshold = parseInt(document.getElementById('roundThreshold').value)
+
+        // Create daily totals using UTC dates
+        const dailyTotals = {}
+        let currentDay = new Date(startDate)
+
+        while (currentDay <= endDate) {
+          const dateStr = currentDay.toISOString().split('T')[0]
+          dailyTotals[dateStr] = 0
+          currentDay.setUTCDate(currentDay.getUTCDate() + 1)
+        }
+
+        // Sum up entries by day
+        entries.forEach(entry => {
+          if (entry.duration > 0) {
+            const entryDate = entry.start.split('T')[0]
+            if (dailyTotals.hasOwnProperty(entryDate)) {
+              dailyTotals[entryDate] += entry.duration
+            }
+          }
+        })
+
+        // Organize into weeks using UTC
+        const weeks = []
+        const today = new Date()
+        const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()))
+        const todayStr = todayUTC.toISOString().split('T')[0]
+
+        // Get day of week in UTC (0=Sunday, 1=Monday, ..., 6=Saturday)
+        let dayOfWeek = todayUTC.getUTCDay()
+        // Convert Sunday (0) to 7 for calculation
+        if (dayOfWeek === 0) dayOfWeek = 7
+
+        const thisMonday = new Date(todayUTC)
+        // Go back to Monday (day 1)
+        thisMonday.setUTCDate(todayUTC.getUTCDate() - (dayOfWeek - 1))
+
+        for (let i = numWeeks; i >= 0; i--) {
+          const weekStart = new Date(thisMonday)
+          weekStart.setUTCDate(thisMonday.getUTCDate() - i * 7)
+
+          const weekEnd = new Date(weekStart)
+          weekEnd.setUTCDate(weekStart.getUTCDate() + 6)
+
+          // For current week, end at today
+          if (i === 0 && weekEnd > todayUTC) {
+            weekEnd.setTime(todayUTC.getTime())
+          }
+
+          const weekData = {
+            weekNumber: getWeekNumber(weekStart),
+            start: weekStart.toISOString().split('T')[0],
+            end: weekEnd.toISOString().split('T')[0],
+            days: [],
+            totalSeconds: 0,
+            totalNetvisorMinutes: 0,
+          }
+
+          let currentDay = new Date(weekStart)
+          while (currentDay <= weekEnd) {
+            const dateStr = currentDay.toISOString().split('T')[0]
+            const seconds = dailyTotals[dateStr] || 0
+            const dayName = new Date(currentDay.getTime() + currentDay.getTimezoneOffset() * 60000).toLocaleDateString('en-US', { weekday: 'short' })
+
+            // Calculate netvisor time
+            const minutes = Math.floor((seconds + 59) / 60)
+            const mod = minutes % 15
+            let roundedMin = mod < roundThreshold ? minutes - mod : minutes + 15 - mod
+            let netvisorMin = Math.max(0, roundedMin - 30)
+
+            const dayData = {
+              date: dateStr,
+              dayName: dayName,
+              seconds: seconds,
+              netvisorMinutes: netvisorMin,
+              isWeekend: dayName === 'Sat' || dayName === 'Sun',
+            }
+
+            // Skip weekend days with no time
+            if (!(dayData.isWeekend && seconds === 0)) {
+              weekData.days.push(dayData)
+              weekData.totalSeconds += seconds
+              weekData.totalNetvisorMinutes += netvisorMin
+            }
+
+            currentDay.setUTCDate(currentDay.getUTCDate() + 1)
+          }
+
+          weeks.push(weekData)
+        }
+
+        // Reverse weeks array so higher week numbers come first
+        weeks.reverse()
+
+        return { weeks, totalEntries: entries.length }
+      }
+
+      // Get ISO week number
+      function getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+        // Set to nearest Thursday: current date + 4 - current day number
+        // Make Sunday's day number 7
+        const dayNum = d.getUTCDay() || 7
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum)
+        // Get first day of year
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+        // Calculate full weeks to nearest Thursday
+        return Math.ceil(((d - yearStart) / 86400000 + 1) / 7)
+      }
+
+      // Format date to DD.MM.YYYY
+      function formatDate(dateString) {
+        try {
+          const [year, month, day] = dateString.split('-')
+          return `${day}.${month}.${year}`
+        } catch (e) {
+          return dateString // Fallback to original
+        }
+      }
+
+      // Format seconds to HH:MM:SS
+      function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600)
+        const m = Math.floor((seconds % 3600) / 60)
+        const s = seconds % 60
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      }
+
+      // Format minutes to HH:MM
+      function formatMinutes(minutes) {
+        const h = Math.floor(minutes / 60)
+        const m = minutes % 60
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`
+      }
+
+      // Display results
+      function displayResults(data) {
+        const resultsDiv = document.getElementById('results')
+        let html = ''
+
+        data.weeks.forEach(week => {
+          html += `
+                    <div class="week-section">
+                        <div class="week-header">Week ${week.weekNumber}</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Weekday</th>
+                                    <th>Netvisor</th>
+                                    <th>Raw Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `
+
+          week.days.forEach(day => {
+            const rowClass = day.isWeekend ? 'weekend' : ''
+            html += `
+                        <tr class="${rowClass}">
+                            <td>${formatDate(day.date)}</td>
+                            <td>${day.dayName}</td>
+                            <td class="netvisor-time">${formatMinutes(day.netvisorMinutes)}</td>
+                            <td>${formatTime(day.seconds)}</td>
+                        </tr>
+                    `
+          })
+
+          const avgSeconds = week.days.length > 0 ? Math.floor(week.totalSeconds / week.days.length) : 0
+
+          html += `
+                            </tbody>
+                        </table>
+                        <div class="week-summary">
+                            <div class="summary-row">
+                                <span class="summary-label">Weekly Total (Netvisor):</span>
+                                <span class="summary-value">${formatMinutes(week.totalNetvisorMinutes)}</span>
+                            </div>
+                            <div class="summary-row">
+                                <span class="summary-label">Weekly Total (Tracked):</span>
+                                <span class="summary-value">${formatTime(week.totalSeconds)}</span>
+                            </div>
+                        </div>
+                    </div>
+                `
+        })
+
+        const cacheTime = localStorage.getItem('toggl_cache_time')
+        if (cacheTime) {
+          html += `<div class="last-updated">Last updated: ${formatTimestamp(parseInt(cacheTime))}</div>`
+        }
+
+        resultsDiv.innerHTML = html
+      }
+
+      // Show error message
+      function showError(message) {
+        const resultsDiv = document.getElementById('results')
+        resultsDiv.innerHTML = `<div class="error">${message}</div>`
+      }
+
+      // Show info message
+      function showInfo(message) {
+        showToast(message, 'info')
+      }
+
+      // Clear cached data
+      function clearCache() {
+        localStorage.removeItem('toggl_cached_data')
+        localStorage.removeItem('toggl_cache_time')
+        document.getElementById('results').innerHTML = ''
+        showToast('Cache cleared! Click "Get New Data" to fetch fresh data.', 'success')
+      }
+
+      // Initialize on page load
+      window.addEventListener('DOMContentLoaded', async () => {
+        loadSettings()
+        loadCachedData()
+        // Pre-fetch CSRF token
+        await getCsrfToken()
+      })
+    </script>
+  </body>
+</html>

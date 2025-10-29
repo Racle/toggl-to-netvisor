@@ -1,0 +1,16 @@
+{
+  "name": "toggl-to-netvisor",
+  "version": "1.0.0",
+  "description": "Convert Toggl time entries to Netvisor-ready hours with CSRF protection",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.0.1",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}
