@@ -6,7 +6,7 @@ services:
     # Or use pre-built image:
     # image: racle90/toggl-to-netvisor:latest
     ports:
-      - "9999:80"
+      - "80:80"
     restart: unless-stopped
     environment:
       - NODE_ENV=production

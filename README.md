@@ -34,7 +34,7 @@ Pre-built images are available at: https://hub.docker.com/repository/docker/racl
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost:9999`
+The application will be available at `http://localhost:80`
 
 ### Using Docker (Build from Source)
 
@@ -78,7 +78,7 @@ environment:
 docker run -d -p 80:80 -e BASE_PATH=/toggl-to-netvisor toggl-to-netvisor
 
 # Or manually
-BASE_PATH=/toggl-to-netvisor node server.js
+BASE_PATH=/toggl-to-netvisor node src/server.js
 ```
 
 Then access the app at `http://localhost/toggl-to-netvisor`
@@ -131,12 +131,12 @@ Then access the app at `http://localhost/toggl-to-netvisor`
 npm install
 
 # Run in development mode
-node server.js
+node src/server.js
 ```
 
 ## Alternative: Command Line Script
 
-For users who prefer command line interface, use `toggl-to-netvisor.sh`:
+For users who prefer command line interface, use `scripts/toggl-to-netvisor.sh`:
 
 ```bash
 # Get your API token from: https://track.toggl.com/profile#api-token
@@ -145,13 +145,13 @@ For users who prefer command line interface, use `toggl-to-netvisor.sh`:
 export TOGGL_API_TOKEN="your_token_here"
 
 # Option 2: Run without setting token (script will prompt for it)
-./toggl-to-netvisor.sh
+./scripts/toggl-to-netvisor.sh
 
 # Run for last week + current week (default)
-./toggl-to-netvisor.sh
+./scripts/toggl-to-netvisor.sh
 
 # Run for last 4 weeks + current week
-./toggl-to-netvisor.sh 4
+./scripts/toggl-to-netvisor.sh 4
 ```
 
 The bash script provides the same time calculation and Netvisor formatting without needing a web server. If `TOGGL_API_TOKEN` is not exported, the script will securely prompt you to enter it.

@@ -9,10 +9,8 @@ COPY package*.json ./
 RUN npm install --production
 
 # Copy application files
-COPY server.js .
-COPY index.html .
-COPY t2n-favicon.png .
-COPY github.png .
+COPY src/ ./src/
+COPY public/ ./public/
 
 # Expose port 80
 EXPOSE 80
@@ -25,4 +23,4 @@ RUN addgroup -g 1001 -S nodejs && \
 USER nodejs
 
 # Start the server
-CMD ["node", "server.js"]
+CMD ["node", "src/server.js"]
