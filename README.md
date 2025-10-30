@@ -132,6 +132,16 @@ Then access the app at `http://localhost/toggl-to-netvisor`
 - API token is stored in localStorage (encrypted password input)
 - Backend proxy prevents CORS issues
 
+### Docker Security Hardening
+
+The Docker container is configured with minimal privileges:
+
+- **No new privileges**: Prevents privilege escalation attacks
+- **Minimal capabilities**: Only NET_BIND_SERVICE (for port 80), all other Linux capabilities dropped
+- **Read-only filesystem**: Container filesystem is immutable at runtime
+- **Secure tmpfs**: Temporary storage with noexec, nosuid, nodev flags
+- **Non-root user**: Runs as unprivileged nodejs user (UID 1001)
+
 ## Development
 
 ```bash
