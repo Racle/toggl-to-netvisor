@@ -1196,6 +1196,17 @@
       window.addEventListener('DOMContentLoaded', async () => {
         loadSettings()
         loadCachedData()
+
+        // Request persistent storage so browsers (e.g. Firefox) don't evict localStorage
+        if (navigator.storage && navigator.storage.persist) {
+          navigator.storage.persist()
+        }
+
+        // Save settings immediately when inputs change
+        document.getElementById('apiToken').addEventListener('change', saveSettings)
+        document.getElementById('numWeeks').addEventListener('change', saveSettings)
+        document.getElementById('roundThreshold').addEventListener('change', saveSettings)
+
         // Pre-fetch CSRF token
         await getCsrfToken()
       })
